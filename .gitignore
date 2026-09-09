@@ -1,0 +1,16 @@
+node_modules
+dist
+.vercel
+*.local
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+scripts/*.js
+scripts/*.d.ts
+src/data/*.js
+src/data/*.d.ts
+src/types/*.js
+src/types/*.d.ts
+.DS_Store
+
+.vercel
