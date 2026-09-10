@@ -1,4 +1,4 @@
-const CACHE = 'impostori-v2'
+const CACHE = 'impostori-v3'
 const CORE = ['/', '/manifest.webmanifest', '/icon.svg', '/og.png']
 
 self.addEventListener('install', (event) => {
@@ -11,6 +11,14 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return
+  if (event.request.mode === 'navigate') {
+    event.respondWith(fetch(event.request).then((response) => {
+      const copy = response.clone()
+      if (response.ok) caches.open(CACHE).then((cache) => cache.put('/', copy))
+      return response
+    }).catch(() => caches.match('/')))
+    return
+  }
   event.respondWith(caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
     const copy = response.clone()
     if (response.ok && new URL(event.request.url).origin === self.location.origin) caches.open(CACHE).then((cache) => cache.put(event.request, copy))
