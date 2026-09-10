@@ -1,4 +1,5 @@
 import type { Difficulty, WordEntry } from '../types/game'
+import { GENERATED_WORD_ROWS } from './generatedDictionary'
 
 type Root = readonly [word: string, hint: string]
 type Variant = readonly [suffix: string, extraHint: string, difficulty: Difficulty]
@@ -428,19 +429,27 @@ export const WORD_GROUPS: readonly WordGroup[] = [
 ] as const
 
 export function buildWordDatabase(): WordEntry[] {
-  let id = 1
-  return WORD_GROUPS.flatMap((group) =>
-    group.roots.flatMap(([root, rootHint]) =>
-      group.variants.map(([suffix, extraHint, difficulty]) => ({
-        id: id++,
-        word: suffix ? `${root} ${suffix}` : root,
-        hint: suffix ? `${rootHint}. ${extraHint}.` : `${rootHint}.`,
+  const curated = WORD_GROUPS.flatMap((group) =>
+    group.roots
+      .filter(([word]) => /^\p{L}+$/u.test(word))
+      .map(([word, hint]) => ({
+        word: word.toLocaleLowerCase('sq'),
+        hint: `${hint.replace(/[.!?]+$/, '')}.`,
         category: group.category,
-        difficulty,
+        difficulty: (group.category === 'Koncepte të vështira' ? 'hard' : 'easy') as Difficulty,
       })),
-    ),
   )
+  const generated = GENERATED_WORD_ROWS.map(([word, hint, category, difficulty]) => ({ word, hint, category, difficulty }))
+  const seen = new Set<string>()
+  return [...curated, ...generated]
+    .filter((entry) => {
+      const key = entry.word.toLocaleLowerCase('sq')
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+    .map((entry, index) => ({ id: index + 1, ...entry }))
 }
 
 export const WORD_DATABASE = buildWordDatabase()
-export const CATEGORIES = WORD_GROUPS.map((group) => group.category)
+export const CATEGORIES = [...new Set(WORD_DATABASE.map((entry) => entry.category))].sort((a, b) => a.localeCompare(b, 'sq'))

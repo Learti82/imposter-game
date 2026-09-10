@@ -12,7 +12,12 @@ function Counter({ value, min, max, onChange }: { value: number; min: number; ma
 
 export function SetupScreen({ settings, onChange, onBack, onStart }: { settings: GameSettings; onChange: (settings: GameSettings) => void; onBack: () => void; onStart: () => void }) {
   const maxImposters = GameEngine.maxImposters(settings.playerCount)
+  const availableCategories = CATEGORIES.filter((category) => settings.difficulty === 'random' || WORD_DATABASE.some((entry) => entry.category === category && entry.difficulty === settings.difficulty))
   const changePlayers = (playerCount: number) => onChange({ ...settings, playerCount, imposterCount: Math.min(settings.imposterCount, GameEngine.maxImposters(playerCount)) })
+  const changeDifficulty = (difficulty: Difficulty | 'random') => {
+    const categoryAvailable = difficulty === 'random' || settings.category === 'Të gjitha kategoritë' || WORD_DATABASE.some((entry) => entry.category === settings.category && entry.difficulty === difficulty)
+    onChange({ ...settings, difficulty, category: categoryAvailable ? settings.category : 'Të gjitha kategoritë' })
+  }
   return (
     <section className="setup-panel enter-up">
       <button className="back-button" onClick={onBack}><ArrowLeft /> Kthehu</button>
@@ -24,9 +29,9 @@ export function SetupScreen({ settings, onChange, onBack, onStart }: { settings:
       </div>
       <div className="setting-card stack-card">
         <label className="field-label" htmlFor="category">Kategoria <small>{WORD_DATABASE.length.toLocaleString('sq-AL')} terma</small></label>
-        <select id="category" value={settings.category} onChange={(event) => onChange({ ...settings, category: event.target.value })}><option>Të gjitha kategoritë</option>{CATEGORIES.map((category) => <option key={category}>{category}</option>)}</select>
+        <select id="category" value={settings.category} onChange={(event) => onChange({ ...settings, category: event.target.value })}><option>Të gjitha kategoritë</option>{availableCategories.map((category) => <option key={category}>{category}</option>)}</select>
         <span className="field-label">Vështirësia</span>
-        <div className="segmented four">{(Object.keys(difficultyLabels) as (Difficulty | 'random')[]).map((level) => <button key={level} className={settings.difficulty === level ? 'active' : ''} onClick={() => onChange({ ...settings, difficulty: level })}>{difficultyLabels[level]}</button>)}</div>
+        <div className="segmented four">{(Object.keys(difficultyLabels) as (Difficulty | 'random')[]).map((level) => <button key={level} className={settings.difficulty === level ? 'active' : ''} onClick={() => changeDifficulty(level)}>{difficultyLabels[level]}</button>)}</div>
       </div>
       <div className="setting-card stack-card">
         <div className="field-label"><span><Timer size={17} /> Koha e diskutimit</span><strong>{Math.round(settings.discussionSeconds / 60)} min</strong></div>

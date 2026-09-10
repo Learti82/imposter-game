@@ -4,7 +4,7 @@ const problems: string[] = []
 const ids = new Set<number>()
 const words = new Set<string>()
 
-if (WORD_DATABASE.length < 3000) problems.push(`Vetëm ${WORD_DATABASE.length} hyrje; kërkohen të paktën 3000.`)
+if (WORD_DATABASE.length < 10000) problems.push(`Vetëm ${WORD_DATABASE.length} hyrje; kërkohen të paktën 10000.`)
 
 for (const entry of WORD_DATABASE) {
   const normalizedWord = entry.word.trim().toLocaleLowerCase('sq')
@@ -12,6 +12,7 @@ for (const entry of WORD_DATABASE) {
   if (ids.has(entry.id)) problems.push(`ID e dyfishtë: ${entry.id}`)
   if (words.has(normalizedWord)) problems.push(`Fjalë e dyfishtë: ${entry.word}`)
   if (!normalizedWord) problems.push(`Fjalë bosh te ID ${entry.id}`)
+  if (!/^\p{L}+$/u.test(entry.word)) problems.push(`Jo një fjalë e vetme: ${entry.word}`)
   if (!normalizedHint) problems.push(`Hint bosh te ID ${entry.id}`)
   if (!entry.category.trim()) problems.push(`Kategori bosh te ID ${entry.id}`)
   if (normalizedWord && normalizedHint.includes(normalizedWord)) problems.push(`Hint-i përmban fjalën: ${entry.word}`)

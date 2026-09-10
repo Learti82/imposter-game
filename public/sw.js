@@ -1,4 +1,4 @@
-const CACHE = 'impostori-v1'
+const CACHE = 'impostori-v2'
 const CORE = ['/', '/manifest.webmanifest', '/icon.svg', '/og.png']
 
 self.addEventListener('install', (event) => {

@@ -6,11 +6,15 @@ import { storage } from './storage'
 export class WordEngine {
   static getRandomWord(options: { category: string; difficulty: Difficulty | 'random' }): WordEntry {
     const { category, difficulty } = options
+    const categoryPool = WORD_DATABASE.filter((entry) => category === 'Të gjitha kategoritë' || entry.category === category)
+    const availableDifficulties = (['easy', 'medium', 'hard'] as Difficulty[]).filter((level) => categoryPool.some((entry) => entry.difficulty === level))
+    const chosenDifficulty = difficulty === 'random' ? availableDifficulties[randomInt(availableDifficulties.length)] : difficulty
     let pool = WORD_DATABASE.filter((entry) =>
       (category === 'Të gjitha kategoritë' || entry.category === category)
-      && (difficulty === 'random' || entry.difficulty === difficulty),
+      && entry.difficulty === chosenDifficulty,
     )
 
+    if (!pool.length) pool = WORD_DATABASE.filter((entry) => entry.difficulty === chosenDifficulty)
     if (!pool.length) pool = WORD_DATABASE
 
     const recentIds = new Set(storage.getRecentWords())
